@@ -11,21 +11,25 @@
 
 # # Basic definitions
 import warnings
-warnings.simplefilter('ignore')
 import numpy as np
-np.warnings.filterwarnings('ignore')
-np.random.seed(1001)
-
 import sys
-import shutil
+# import shutil
 from pathlib import Path
-import pandas as pd
+# import pandas as pd
 import matplotlib.pyplot as plt
+from config import *
+
+warnings.simplefilter('ignore')
+warnings.filterwarnings('ignore')
+
+np.random.seed(1001)
 sys.path.insert(0, str(Path.cwd()))
 
-# # Configration
+
+# Configration
 def is_handling_audio(conf):
     return 'sampling_rate' in conf
+
 
 def test_conf(conf):
     if conf.model not in ['mobilenetv2', 'alexnet']:
@@ -33,6 +37,7 @@ def test_conf(conf):
     if conf.data_balancing not in ['over_sampling', 'under_sampling',
                                         'by_generator', 'dont_balance']:
         raise Exception('conf.data_balancing not recognized: {}'.format(conf.data_balancing))
+
 
 def auto_complete_conf(conf):
     if 'folder' in conf:
@@ -52,7 +57,7 @@ def auto_complete_conf(conf):
     if 'metric_save_ckpt' not in conf:
         conf.metric_save_ckpt = 'val_loss'
     if 'metric_save_mode' not in conf:
-        conf.metric_save_mode='auto'
+        conf.metric_save_mode = 'auto'
     if 'logdir' not in conf:
         conf.logdir = 'logs'
     if 'data_balancing' not in conf:
@@ -60,8 +65,8 @@ def auto_complete_conf(conf):
     if 'X_train' not in conf:
         conf.X_train = 'X_train.npy'
         conf.y_train = 'y_train.npy'
-        conf.X_test  = 'X_test.npy'
-        conf.y_test  = 'y_test.npy'
+        conf.X_test = 'X_test.npy'
+        conf.y_test = 'y_test.npy'
     if 'steps_per_epoch_limit' not in conf:
         conf.steps_per_epoch_limit = None
     if 'aug_mixup_alpha' not in conf:
@@ -69,15 +74,17 @@ def auto_complete_conf(conf):
     if 'samples_per_file' not in conf:
         conf.samples_per_file = 1
     if 'eval_ensemble' not in conf:
-        conf.eval_ensemble = True # Set False if samples_per_file > 1 but ensemble is not available
+        conf.eval_ensemble = True  # Set False if samples_per_file > 1 but ensemble is not available
     if 'what_is_sample' not in conf:
         conf.what_is_sample = 'log mel-spectrogram'
     if 'use_audio_training_model' not in conf:
         conf.use_audio_training_model = True
 
-from config import *
+
+# from config import *
 auto_complete_conf(conf)
 print(conf)
+
 
 # # Data utilities
 def load_labels(conf):
@@ -85,15 +92,19 @@ def load_labels(conf):
     auto_complete_conf(conf)
     print('Labels are', conf.labels)
 
+
 def datapath(conf, filename):
     return conf.folder / filename
+
 
 def load_npy(conf, filename):
     return np.load(conf.folder / filename)
 
+
 # # Model
 if conf.use_audio_training_model:
     from sound_models import create_model, freeze_model_layers
+
 
 # # Audio Utilities
 import librosa
@@ -115,7 +126,7 @@ def read_audio(conf, pathname, trim_long_data):
     return y
 
 def audio_to_melspectrogram(conf, audio):
-    spectrogram = librosa.feature.melspectrogram(audio, 
+    spectrogram = librosa.feature.melspectrogram(y=audio,
                                                  sr=conf.sampling_rate,
                                                  n_mels=conf.n_mels,
                                                  hop_length=conf.hop_length,
@@ -204,7 +215,8 @@ def geometric_mean_preds(_preds):
     return np.power(preds[0], 1/preds.shape[0])
 
 # # Tensorflow Utilities
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+
 
 def load_graph(model_file):
     graph = tf.Graph()

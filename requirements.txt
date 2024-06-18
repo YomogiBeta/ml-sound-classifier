@@ -1,0 +1,9 @@
+Tensorflow
+Keras
+LibROSA
+PyAudio
+EasyDict
+Pandas
+Matplotlib
+imbalanced-learn
+numpy
